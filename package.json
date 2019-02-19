@@ -5,11 +5,13 @@
   "description": "A boilerplate for node-focused open-source libraries.",
   "license": "MIT",
   "author": "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
+    "compile": "babel src -d lib",
     "lint": "eslint src",
     "precommit": "lint-staged",
     "prepush": "yarn qa",
+    "prepublish": "yarn qa && yarn compile",
     "qa": "yarn test && yarn lint",
     "test": "jest src"
   },
@@ -38,6 +40,9 @@
     }
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.3",
+    "@babel/preset-env": "^7.3.1",
     "eslint": "^5.14.1",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.16.0",
