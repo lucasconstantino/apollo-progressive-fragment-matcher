@@ -18,6 +18,8 @@ This boilerplate is the starting point for [Lucas's](https://github.com/lucascon
 
 ## Usage
 
+> Clone this project, re-initialize Git, and go on with your life. The following is just to keep an example for future libraries ;)
+
 ### Installation
 
 ```
