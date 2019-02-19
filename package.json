@@ -1,0 +1,9 @@
+{
+  "name": "node-contrib-boilerplate",
+  "version": "1.0.0",
+  "description": "A boilerplate for node-focused open-source libraries.",
+  "main": "index.js",
+  "author": "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>",
+  "license": "MIT",
+  "private": false
+}
