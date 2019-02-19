@@ -13,6 +13,7 @@
     "prepush": "yarn qa",
     "prepublish": "yarn qa && yarn compile",
     "qa": "yarn test && yarn lint",
+    "release": "standard-version",
     "test": "jest src"
   },
   "lint-staged": {
@@ -53,6 +54,7 @@
     "jest": "^24.1.0",
     "lint-staged": "^8.1.4",
     "prettier-eslint-cli": "^4.7.1",
-    "sort-package-json": "^1.19.0"
+    "sort-package-json": "^1.19.0",
+    "standard-version": "^5.0.0"
   }
 }
