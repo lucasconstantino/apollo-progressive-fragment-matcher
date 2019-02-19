@@ -1,5 +1,5 @@
 {
-  "name": "node-contrib-boilerplate",
+  "name": "node-library-boilerplate",
   "version": "1.0.0",
   "private": false,
   "description": "A boilerplate for node-focused open-source libraries.",
