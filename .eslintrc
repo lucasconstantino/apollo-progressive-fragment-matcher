@@ -1,3 +1,19 @@
 {
   "extends": ["standard"],
+  "overrides": [
+    {
+      "files": ["*.test.js"],
+      "globals": {
+        "jest": false,
+        "describe": false,
+        "expect": false,
+        "it": false,
+        "beforeEach": false,
+        "beforeAll": false,
+        "afterEach": false,
+        "afterAll": false
+      }
+    }
+  ]
+
 }
