@@ -1,8 +1,8 @@
 {
-  "name": "node-library-boilerplate",
+  "name": "apollo-progressive-fragment-matcher",
   "version": "1.0.0",
   "private": false,
-  "description": "A boilerplate for node-focused open-source libraries.",
+  "description": "A fragment matcher with support for unions & interfaces.",
   "license": "MIT",
   "author": "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>",
   "main": "lib/index.js",
@@ -39,6 +39,9 @@
         "statements": 90
       }
     }
+  },
+  "dependencies": {
+    "apollo-cache-inmemory": "^1.5.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
