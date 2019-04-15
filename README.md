@@ -24,26 +24,96 @@ Welcome `ProgressiveFragmentMatcher`.
 
 ## Usage
 
-### Requirements
-
-This project uses the concept of [GraphQL extensions](https://graphql.github.io/graphql-spec/June2018/#sec-Response-Format) to append data to a response. This means you _must_ be able to control the GraphQL server, besides the Apollo Client.
-
 ### Installation
 
 ```
 npm i apollo-progressive-fragment-matcher
 ```
 
-### Usage
+### How to use
 
-#### Server
+`ProgressiveFragmentMatcher` has two strategies for matching fragment types:
+
+> Due to a limitation on ApolloClient's customizing capabilities, both strategies require you append a link created from the fragment matcher instance.
+
+#### Progressive introspection (default)
+
+This strategy _transforms_ the outgoing queries to request introspection information on the requesting types. It does cache the results, meaning if on a second query you use the same fragment type, it won't introspect again (nor transform the query, which can be expensive).
+
+> This strategy is much like what ApolloClient normally does to inject \_\_typename fields.
+
+**Good**:
+
+- Easy to install;
+- Drop-in replacement for `IntrospectionFragmentMatcher`;
+
+**Bad**:
+
+- Query transforms are expensive;
+
+##### Usage
 
 ```js
-// sample usage...
+import ApolloClient from 'apollo-client'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import { from } from 'apollo-link'
+import { HttpLink } from 'apollo-link-http'
+import { ProgressiveFragmentMatcher } from 'apollo-progressive-fragment-matcher'
+
+const fragmentMatcher = new ProgressiveFragmentMatcher()
+
+const client = new ApolloClient({
+  cache: new InMemoryCache({ fragmentMatcher }),
+  link: from([fragmentMatcher.link(), new HttpLink()]),
+})
 ```
 
-#### Client
+#### Extension based
+
+This strategy is very performatic on the client side, because it does not depend on query transformation. What this strategy does is send the server an extension flag (`{ possibleTypes: true }`) to request the server to send possible types of any returned type in the query - regardless of the fragments requested.
+
+> This strategy requires you have control of the server, and currently only works with ApolloServer custom extensions implementation.
+
+**Good**:
+
+- Fast on client;
+
+**Bad**:
+
+- Requires server control;
+
+##### Usage
+
+**client:**
 
 ```js
-// sample usage...
+import ApolloClient from 'apollo-client'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import { from } from 'apollo-link'
+import { HttpLink } from 'apollo-link-http'
+import { ProgressiveFragmentMatcher } from 'apollo-progressive-fragment-matcher'
+
+const fragmentMatcher = new ProgressiveFragmentMatcher({
+  strategy: 'extension',
+})
+
+const client = new ApolloClient({
+  cache: new InMemoryCache({ fragmentMatcher }),
+  link: from([fragmentMatcher.link(), new HttpLink()]),
+})
+```
+
+**server**
+
+```js
+import { ApolloServer } from 'apollo-server'
+import { PossibleTypesExtension } from 'apollo-progressive-fragment-matcher'
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  extensions: [() => new PossibleTypesExtension()],
+})
+
+server.listen() // start server
 ```
