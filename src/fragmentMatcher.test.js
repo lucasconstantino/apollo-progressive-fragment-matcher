@@ -1,4 +1,5 @@
 import gql from 'graphql-tag'
+import { print } from 'graphql/language'
 import { ApolloClient } from 'apollo-client'
 import { ApolloLink, Observable } from 'apollo-link'
 import { InMemoryCache } from 'apollo-cache-inmemory'
@@ -163,5 +164,141 @@ describe('ProgressiveFragmentMatcher', () => {
       expect(result).toHaveProperty('data.characters.1.name', 'R2D2')
       expect(result).toHaveProperty('data.characters.1.primaryFunction', 'joke')
     })
+  })
+
+  describe('strategy: introspect', () => {
+    const newClient = (...results) => {
+      const fragmentMatcher = new ProgressiveFragmentMatcher({
+        strategy: 'introspection'
+      })
+      const handler = jest.fn(() => Observable.of(results.shift()))
+
+      const client = new ApolloClient({
+        cache: new InMemoryCache({ fragmentMatcher }),
+        link: ApolloLink.from([fragmentMatcher.link(), new ApolloLink(handler)])
+      })
+
+      return { client, handler }
+    }
+
+    it('should append type introspections', async () => {
+      const data = { obj: null, __Obj__: null }
+      const { client, handler } = newClient({ data })
+      const query = gql`
+        {
+          obj {
+            ... on Obj {
+              field
+            }
+          }
+        }
+      `
+
+      const expectedQuery = gql`
+        {
+          obj {
+            ... on Obj {
+              field
+              __typename
+            }
+            __typename
+          }
+
+          __Obj__: __type(name: "Obj") {
+            interfaces {
+              name
+            }
+          }
+        }
+      `
+
+      await client.query({ query })
+
+      const operation = handler.mock.calls[0][0]
+
+      expect(print(operation.query)).toBe(print(expectedQuery))
+    })
+
+    // it('should fetch a direct type fragment', async () => {
+    //   const data = { obj: { __typename: 'Obj', field: 'bar' } }
+    //   const extensions = { possibleTypes: { Obj: ['Obj'] } }
+    //   const { client } = newClient({ data, extensions })
+    //   const query = gql`
+    //     {
+    //       obj {
+    //         ... on Obj {
+    //           field
+    //         }
+    //       }
+    //     }
+    //   `
+
+    //   const result = await client.query({ query })
+
+    //   expect(result).toHaveProperty('data.obj.field', 'bar')
+    // })
+
+    // it('should fetch an inheriting fragment', async () => {
+    //   const data = { obj: { __typename: 'Obj', field: 'bar' } }
+    //   const extensions = { possibleTypes: { Obj: ['ParentType'] } }
+    //   const { client } = newClient({ data, extensions })
+    //   const query = gql`
+    //     {
+    //       obj {
+    //         ... on ParentType {
+    //           field
+    //         }
+    //       }
+    //     }
+    //   `
+
+    //   const result = await client.query({ query })
+
+    //   expect(result).toHaveProperty('data.obj.field', 'bar')
+    // })
+
+    // it('should fetch on multiple inheriting fragments', async () => {
+    //   const data = {
+    //     characters: [
+    //       { __typename: 'Human', name: 'Luke', height: '180' },
+    //       { __typename: 'Droid', name: 'R2D2', primaryFunction: 'joke' }
+    //     ]
+    //   }
+    //   const extensions = {
+    //     possibleTypes: {
+    //       Human: ['Character'],
+    //       Droid: ['Character']
+    //     }
+    //   }
+
+    //   const { client } = newClient({ data, extensions })
+    //   const query = gql`
+    //     fragment characterFields on Character {
+    //       name
+
+    //       ... on Droid {
+    //         primaryFunction
+    //       }
+
+    //       ... on Human {
+    //         height
+    //       }
+    //     }
+
+    //     query {
+    //       characters {
+    //         __typename
+    //         ...characterFields
+    //       }
+    //     }
+    //   `
+
+    //   const result = await client.query({ query })
+
+    //   expect(result).toHaveProperty('data.characters.0.name', 'Luke')
+    //   expect(result).toHaveProperty('data.characters.0.height', '180')
+    //   expect(result).toHaveProperty('data.characters.1.name', 'R2D2')
+    //   expect(result).toHaveProperty('data.characters.1.primaryFunction', 'joke')
+    // })
   })
 })
