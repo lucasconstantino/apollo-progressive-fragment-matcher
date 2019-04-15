@@ -166,7 +166,7 @@ describe('ProgressiveFragmentMatcher', () => {
     })
   })
 
-  describe('strategy: introspect', () => {
+  describe('strategy: introspection', () => {
     const newClient = (...results) => {
       const fragmentMatcher = new ProgressiveFragmentMatcher({
         strategy: 'introspection'
@@ -305,6 +305,77 @@ describe('ProgressiveFragmentMatcher', () => {
       expect(result).toHaveProperty('data.characters.0.height', '180')
       expect(result).toHaveProperty('data.characters.1.name', 'R2D2')
       expect(result).toHaveProperty('data.characters.1.primaryFunction', 'joke')
+    })
+
+    it('should NOT append type introspections on second requests', async () => {
+      const first = {
+        result: { data: { first: null, __Obj__: null } },
+        query: gql`
+          query FIRST {
+            first {
+              ... on Obj {
+                field
+              }
+            }
+          }
+        `,
+        transformed: gql`
+          query FIRST {
+            first {
+              ... on Obj {
+                field
+                __typename
+              }
+              __typename
+            }
+
+            __Obj__: __type(name: "Obj") {
+              possibleTypes {
+                name
+              }
+            }
+          }
+        `
+      }
+
+      const second = {
+        result: { data: { second: null } },
+        query: gql`
+          query SECOND {
+            second {
+              ... on Obj {
+                field
+              }
+            }
+          }
+        `,
+        transformed: gql`
+          query SECOND {
+            second {
+              ... on Obj {
+                field
+                __typename
+              }
+              __typename
+            }
+          }
+        `
+      }
+
+      const { client, handler } = newClient(first.result, second.result)
+
+      await client.query({ query: first.query })
+      await client.query({ query: second.query })
+
+      expect(handler).toHaveBeenCalledTimes(2)
+
+      const operations = {
+        first: handler.mock.calls[0][0],
+        second: handler.mock.calls[1][0]
+      }
+
+      expect(print(operations.first.query)).toBe(print(first.transformed))
+      expect(print(operations.second.query)).toBe(print(second.transformed))
     })
   })
 })

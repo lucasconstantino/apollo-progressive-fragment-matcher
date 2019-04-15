@@ -50,8 +50,10 @@ const strategies = {
         const types = []
 
         const extractFragmentName = node => {
-          if (!types.includes(node.typeCondition.name.value)) {
-            types.push(node.typeCondition.name.value)
+          const type = node.typeCondition.name.value
+
+          if (!types.includes(type) && !this.possibleTypesMap[type]) {
+            types.push(type)
           }
         }
 
@@ -76,6 +78,10 @@ const strategies = {
         return forward({ ...operation, query: altered }).map(result => {
           for (const type of types) {
             const alias = `__${type}__`
+
+            if (!this.possibleTypesMap[type]) {
+              this.possibleTypesMap[type] = []
+            }
 
             if (result.data[alias] && result.data[alias].possibleTypes) {
               for (const { name } of result.data[alias].possibleTypes) {
