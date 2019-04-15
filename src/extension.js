@@ -36,6 +36,8 @@ export class PossibleTypesExtension {
   extractTypes (obj) {
     const types = []
 
+    if (!obj) return types
+
     for (let field of Object.keys(obj)) {
       if (field === '__typename') types.push(obj[field])
 

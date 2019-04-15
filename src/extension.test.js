@@ -15,9 +15,19 @@ const characters = [
   { type: 'droid', name: 'C-3PO', primaryFunction: 'complain' }
 ]
 
+const planets = [
+  { type: 'planet', name: 'Naboo', sector: 'Arkanis' },
+  { type: 'planet', name: 'Tatooine', sector: 'Chommell' }
+]
+
 const typeDefs = graphql`
   interface Character {
     name: String!
+  }
+
+  type Planet {
+    name: String!
+    region: String!
   }
 
   type Human implements Character {
@@ -30,11 +40,14 @@ const typeDefs = graphql`
     primaryFunction: String!
   }
 
+  union Named = Human | Planet
+
   type Query {
     human(name: String!): Human
     droid(name: String!): Droid
     character(name: String!): Character
     characters: [Character]
+    named(name: String!): Named
   }
 `
 
@@ -42,6 +55,8 @@ const map = {
   Human: ['Character'],
   Droid: ['Character']
 }
+
+const typenames = { human: 'Human', droid: 'Droid', planet: 'Planet' }
 
 const resolvers = {
   Query: {
@@ -53,10 +68,16 @@ const resolvers = {
 
     character: (root, { name }) => characters.find(char => char.name === name),
 
-    characters: () => characters
+    characters: () => characters,
+
+    named: (root, { name }) =>
+      [].concat(characters, planets).find(named => named.name === name)
   },
   Character: {
-    __resolveType: ({ type }) => ({ human: 'Human', droid: 'Droid' }[type])
+    __resolveType: ({ type }) => typenames[type]
+  },
+  Named: {
+    __resolveType: ({ type }) => typenames[type]
   }
 }
 
@@ -103,13 +124,13 @@ describe('PossibleTypesExtension', () => {
     expect(result).toHaveProperty('data.droid.primaryFunction', 'joke')
   })
 
-  it('should return possible types when requested', async () => {
+  it('should return possible interface types when requested', async () => {
     const client = newClient()
     const query = gql`
       {
-        human(name: "Luke") {
+        droid(name: "R2D2") {
           name
-          height
+          primaryFunction
         }
       }
     `
@@ -117,6 +138,29 @@ describe('PossibleTypesExtension', () => {
     const extensions = { possibleTypes: true }
     const result = await client.query({ query, extensions })
 
+    expect(result).toHaveProperty('data.droid.name', 'R2D2')
+    expect(result).toHaveProperty('data.droid.primaryFunction', 'joke')
+    expect(result).toHaveProperty('extensions.possibleTypes.Droid', map.Droid)
+  })
+
+  it('should return possible types when requesting a union', async () => {
+    const client = newClient()
+    const query = gql`
+      {
+        named(name: "Luke") {
+          ... on Human {
+            name
+            height
+          }
+        }
+      }
+    `
+
+    const extensions = { possibleTypes: true }
+    const result = await client.query({ query, extensions })
+
+    expect(result).toHaveProperty('data.named.name', 'Luke')
+    expect(result).toHaveProperty('data.named.height', '180')
     expect(result).toHaveProperty('extensions.possibleTypes.Human', map.Human)
   })
 
