@@ -181,6 +181,24 @@ describe('ProgressiveFragmentMatcher', () => {
       return { client, handler }
     }
 
+    it('should fetch a direct type fragment', async () => {
+      const data = { obj: { __typename: 'Obj', field: 'bar' }, __Obj__: null }
+      const { client } = newClient({ data })
+      const query = gql`
+        {
+          obj {
+            ... on Obj {
+              field
+            }
+          }
+        }
+      `
+
+      const result = await client.query({ query })
+
+      expect(result).toHaveProperty('data.obj.field', 'bar')
+    })
+
     it('should append type introspections', async () => {
       const data = { obj: null, __Obj__: null }
       const { client, handler } = newClient({ data })
@@ -205,7 +223,7 @@ describe('ProgressiveFragmentMatcher', () => {
           }
 
           __Obj__: __type(name: "Obj") {
-            interfaces {
+            possibleTypes {
               name
             }
           }
@@ -219,86 +237,74 @@ describe('ProgressiveFragmentMatcher', () => {
       expect(print(operation.query)).toBe(print(expectedQuery))
     })
 
-    // it('should fetch a direct type fragment', async () => {
-    //   const data = { obj: { __typename: 'Obj', field: 'bar' } }
-    //   const extensions = { possibleTypes: { Obj: ['Obj'] } }
-    //   const { client } = newClient({ data, extensions })
-    //   const query = gql`
-    //     {
-    //       obj {
-    //         ... on Obj {
-    //           field
-    //         }
-    //       }
-    //     }
-    //   `
+    it('should fetch an inheriting fragment', async () => {
+      const data = {
+        obj: { __typename: 'Obj', field: 'bar' },
+        __ParentType__: {
+          possibleTypes: [{ name: 'Obj' }]
+        }
+      }
+      const { client } = newClient({ data })
+      const query = gql`
+        {
+          obj {
+            ... on ParentType {
+              field
+            }
+          }
+        }
+      `
 
-    //   const result = await client.query({ query })
+      const result = await client.query({ query })
 
-    //   expect(result).toHaveProperty('data.obj.field', 'bar')
-    // })
+      expect(result).toHaveProperty('data.obj.field', 'bar')
+    })
 
-    // it('should fetch an inheriting fragment', async () => {
-    //   const data = { obj: { __typename: 'Obj', field: 'bar' } }
-    //   const extensions = { possibleTypes: { Obj: ['ParentType'] } }
-    //   const { client } = newClient({ data, extensions })
-    //   const query = gql`
-    //     {
-    //       obj {
-    //         ... on ParentType {
-    //           field
-    //         }
-    //       }
-    //     }
-    //   `
+    it('should fetch on multiple inheriting fragments', async () => {
+      const data = {
+        characters: [
+          { __typename: 'Human', name: 'Luke', height: '180' },
+          { __typename: 'Droid', name: 'R2D2', primaryFunction: 'joke' }
+        ],
+        __Character__: {
+          possibleTypes: [{ name: 'Human' }, { name: 'Droid' }]
+        },
+        __Droid__: {
+          possibleTypes: null
+        },
+        __Human__: {
+          possibleTypes: null
+        }
+      }
 
-    //   const result = await client.query({ query })
+      const { client } = newClient({ data })
 
-    //   expect(result).toHaveProperty('data.obj.field', 'bar')
-    // })
+      const query = gql`
+        fragment characterFields on Character {
+          name
 
-    // it('should fetch on multiple inheriting fragments', async () => {
-    //   const data = {
-    //     characters: [
-    //       { __typename: 'Human', name: 'Luke', height: '180' },
-    //       { __typename: 'Droid', name: 'R2D2', primaryFunction: 'joke' }
-    //     ]
-    //   }
-    //   const extensions = {
-    //     possibleTypes: {
-    //       Human: ['Character'],
-    //       Droid: ['Character']
-    //     }
-    //   }
+          ... on Droid {
+            primaryFunction
+          }
 
-    //   const { client } = newClient({ data, extensions })
-    //   const query = gql`
-    //     fragment characterFields on Character {
-    //       name
+          ... on Human {
+            height
+          }
+        }
 
-    //       ... on Droid {
-    //         primaryFunction
-    //       }
+        query {
+          characters {
+            ...characterFields
+          }
+        }
+      `
 
-    //       ... on Human {
-    //         height
-    //       }
-    //     }
+      const result = await client.query({ query })
 
-    //     query {
-    //       characters {
-    //         __typename
-    //         ...characterFields
-    //       }
-    //     }
-    //   `
-
-    //   const result = await client.query({ query })
-
-    //   expect(result).toHaveProperty('data.characters.0.name', 'Luke')
-    //   expect(result).toHaveProperty('data.characters.0.height', '180')
-    //   expect(result).toHaveProperty('data.characters.1.name', 'R2D2')
-    //   expect(result).toHaveProperty('data.characters.1.primaryFunction', 'joke')
-    // })
+      expect(result).toHaveProperty('data.characters.0.name', 'Luke')
+      expect(result).toHaveProperty('data.characters.0.height', '180')
+      expect(result).toHaveProperty('data.characters.1.name', 'R2D2')
+      expect(result).toHaveProperty('data.characters.1.primaryFunction', 'joke')
+    })
   })
 })

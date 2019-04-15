@@ -61,21 +61,29 @@ const strategies = {
           FragmentDefinition: { enter: extractFragmentName }
         })
 
+        const operationDefinition = altered.definitions.find(
+          ({ kind }) => kind === 'OperationDefinition'
+        )
+
         for (const type of types) {
-          altered.definitions[0].selectionSet.selections = [
-            ...altered.definitions[0].selectionSet.selections,
+          operationDefinition.selectionSet.selections = [
+            ...operationDefinition.selectionSet.selections,
             createTypeIntrospectionSelection(type)
           ]
         }
 
         // enable possible types fetching.
         return forward({ ...operation, query: altered }).map(result => {
-          if (result.extensions && result.extensions.possibleTypes) {
-            const types = result.extensions.possibleTypes
+          for (const type of types) {
+            const alias = `__${type}__`
 
-            for (let type in types) {
-              if (types.hasOwnProperty(type) && !this.possibleTypesMap[type]) {
-                this.possibleTypesMap[type] = types[type]
+            if (result.data[alias] && result.data[alias].possibleTypes) {
+              for (const { name } of result.data[alias].possibleTypes) {
+                this.possibleTypesMap[name] = this.possibleTypesMap[name] || []
+
+                if (!this.possibleTypesMap[name].includes(type)) {
+                  this.possibleTypesMap[name].push(type)
+                }
               }
             }
           }

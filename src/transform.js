@@ -29,7 +29,7 @@ const createTypeIntrospectionSelection = name => ({
         kind: 'Field',
         name: {
           kind: 'Name',
-          value: 'interfaces'
+          value: 'possibleTypes'
         },
         arguments: [],
         directives: [],
