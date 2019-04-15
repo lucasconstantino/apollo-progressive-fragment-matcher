@@ -30,13 +30,12 @@ Welcome `ProgressiveFragmentMatcher`.
 npm i apollo-progressive-fragment-matcher
 ```
 
-### How to use
+### `ProgressiveFragmentMatcher`
 
-`ProgressiveFragmentMatcher` has two strategies for matching fragment types:
+The _Progressive Fragment Matcher_ has two strategies for matching fragment types:
 
-> Due to a limitation on ApolloClient's customizing capabilities, both strategies require you append a link created from the fragment matcher instance.
-
-#### Progressive introspection (default)
+<details>
+  <summary>Progressive introspection (default)</summary>
 
 This strategy _transforms_ the outgoing queries to request introspection information on the requesting types. It does cache the results, meaning if on a second query you use the same fragment type, it won't introspect again (nor transform the query, which can be expensive).
 
@@ -68,7 +67,10 @@ const client = new ApolloClient({
 })
 ```
 
-#### Extension based
+</details>
+
+<details>
+  <summary>Extension based</summary>
 
 This strategy is very performatic on the client side, because it does not depend on query transformation. What this strategy does is send the server an extension flag (`{ possibleTypes: true }`) to request the server to send possible types of any returned type in the query - regardless of the fragments requested.
 
@@ -117,3 +119,7 @@ const server = new ApolloServer({
 
 server.listen() // start server
 ```
+
+</details>
+
+> Due to a limitation on ApolloClient's customizing capabilities, both strategies require you append a link created from the fragment matcher instance.
