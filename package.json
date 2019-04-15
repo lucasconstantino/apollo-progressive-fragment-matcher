@@ -85,6 +85,7 @@
   },
   "peerDependencies": {
     "apollo-cache-inmemory": "^1.5.1",
+    "graphql": "^14.2.1",
     "invariant": "^2.2.4"
   }
 }

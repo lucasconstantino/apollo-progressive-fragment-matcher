@@ -27,7 +27,7 @@ Welcome `ProgressiveFragmentMatcher`.
 ### Installation
 
 ```
-npm i apollo-progressive-fragment-matcher apollo-cache-inmemory invariant
+npm i apollo-progressive-fragment-matcher apollo-cache-inmemory graphql invariant
 ```
 
 ### `ProgressiveFragmentMatcher`
