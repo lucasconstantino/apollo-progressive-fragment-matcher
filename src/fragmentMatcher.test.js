@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
 import { print } from 'graphql/language'
 import { ApolloClient } from 'apollo-client'
-import { ApolloLink, Observable } from 'apollo-link'
+import { ApolloLink, Observable, from } from 'apollo-link'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 
 import { ProgressiveFragmentMatcher } from './fragmentMatcher'
@@ -13,7 +13,7 @@ describe('ProgressiveFragmentMatcher', () => {
 
     const client = new ApolloClient({
       cache: new InMemoryCache({ fragmentMatcher }),
-      link: ApolloLink.from([fragmentMatcher.link(), new ApolloLink(handler)])
+      link: from([fragmentMatcher.link(), new ApolloLink(handler)])
     })
 
     return { client, handler }
@@ -72,7 +72,7 @@ describe('ProgressiveFragmentMatcher', () => {
 
       const client = new ApolloClient({
         cache: new InMemoryCache({ fragmentMatcher }),
-        link: ApolloLink.from([fragmentMatcher.link(), new ApolloLink(handler)])
+        link: from([fragmentMatcher.link(), new ApolloLink(handler)])
       })
 
       return { client, handler }
@@ -189,7 +189,7 @@ describe('ProgressiveFragmentMatcher', () => {
 
       const client = new ApolloClient({
         cache: new InMemoryCache({ fragmentMatcher }),
-        link: ApolloLink.from([fragmentMatcher.link(), new ApolloLink(handler)])
+        link: from([fragmentMatcher.link(), new ApolloLink(handler)])
       })
 
       return { client, handler }
