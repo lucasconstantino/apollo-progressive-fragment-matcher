@@ -3,8 +3,22 @@
   "version": "1.0.1",
   "private": false,
   "description": "A smart alternative to the introspection fragment matcher.",
+  "keywords": [
+    "apollo",
+    "apollo-client",
+    "fragments",
+    "graphql",
+    "introspection"
+  ],
+  "homepage": "https://github.com/lucasconstantino/apollo-progressive-fragment-matcher",
+  "bugs": {
+    "url": "https://github.com/lucasconstantino/apollo-progressive-fragment-matcher/issues"
+  },
   "license": "MIT",
   "author": "Lucas Constantino Silva <lucasconstantinosilva@gmail.com>",
+  "files": [
+    "lib/**/*"
+  ],
   "main": "lib/index.js",
   "scripts": {
     "compile": "babel src -d lib --ignore src/**/*.test.js",
