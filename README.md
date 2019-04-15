@@ -79,6 +79,7 @@ This strategy is very performatic on the client side, because it does not depend
 **Good**:
 
 - Fast on client;
+- Persisted queries supported;
 
 **Bad**:
 
@@ -123,3 +124,11 @@ server.listen() // start server
 </details>
 
 > Due to a limitation on ApolloClient's customizing capabilities, both strategies require you append a link created from the fragment matcher instance.
+
+## Warning :warning:
+
+Although [well tested](https://codecov.io/github/lucasconstantino/node-contrib-boilerplate), this project is in an **experimental stage**.
+
+### About persisted queries
+
+I have not yet stressed it out on complicating circustances such as _persistend queries_. I've marked the `extension` strategy as supporting _persisted queries_ due to the nature of this operation - it relies on no query transformation, therefore _should_ be compatible with persisted queries, but no test prove this concept yet.
