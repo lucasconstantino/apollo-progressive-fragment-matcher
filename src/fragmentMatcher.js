@@ -1,8 +1,7 @@
-import { visit } from 'graphql/language'
 import { ApolloLink } from 'apollo-link'
 import invariant from 'invariant'
 
-import { createTypeIntrospectionSelection } from './transform'
+import { addTypeIntrospections } from './transform'
 
 const defaultOptions = {
   strategy: 'extension' // 'extension' | ''
@@ -47,35 +46,12 @@ const strategies = {
   introspection: {
     link () {
       return new ApolloLink((operation, forward) => {
-        const types = []
-
-        const extractFragmentName = node => {
-          const type = node.typeCondition.name.value
-
-          if (!types.includes(type) && !this.possibleTypesMap[type]) {
-            types.push(type)
-          }
-        }
-
-        // iterate query AST and extract fragment types.
-        const altered = visit(operation.query, {
-          InlineFragment: { enter: extractFragmentName },
-          FragmentDefinition: { enter: extractFragmentName }
+        const { types, query } = addTypeIntrospections(operation.query, {
+          possibleTypes: this.possibleTypesMap
         })
 
-        const operationDefinition = altered.definitions.find(
-          ({ kind }) => kind === 'OperationDefinition'
-        )
-
-        for (const type of types) {
-          operationDefinition.selectionSet.selections = [
-            ...operationDefinition.selectionSet.selections,
-            createTypeIntrospectionSelection(type)
-          ]
-        }
-
         // enable possible types fetching.
-        return forward({ ...operation, query: altered }).map(result => {
+        return forward({ ...operation, query }).map(result => {
           for (const type of types) {
             const alias = `__${type}__`
 
@@ -123,14 +99,6 @@ export class ProgressiveFragmentMatcher {
 
     // set strategy based methods.
     this.link = strategy.link.bind(this)
-  }
-
-  ensureReady () {
-    return Promise.resolve()
-  }
-
-  canBypassInit () {
-    return true // we don't need to initialize this fragment matcher.
   }
 
   match (idValue, typeCondition, context) {
