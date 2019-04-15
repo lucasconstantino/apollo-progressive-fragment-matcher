@@ -11,8 +11,11 @@ export class ProgressiveFragmentMatcher {
   }
 
   link () {
-    return new ApolloLink((operation, forward) =>
-      forward(operation).map(result => {
+    return new ApolloLink((operation, forward) => {
+      // enable possible types fetching.
+      operation.extensions.possibleTypes = true
+
+      return forward(operation).map(result => {
         if (result.extensions && result.extensions.possibleTypes) {
           const types = result.extensions.possibleTypes
 
@@ -25,7 +28,7 @@ export class ProgressiveFragmentMatcher {
 
         return result
       })
-    )
+    })
   }
 
   ensureReady () {

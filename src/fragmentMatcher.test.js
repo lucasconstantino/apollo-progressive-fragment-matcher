@@ -3,19 +3,19 @@ import { ApolloClient } from 'apollo-client'
 import { ApolloLink, Observable } from 'apollo-link'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 
-import { ProgressiveFragmentMatcher } from './'
+import { ProgressiveFragmentMatcher } from './fragmentMatcher'
 
 describe('ProgressiveFragmentMatcher', () => {
   const newClient = (...results) => {
     const fragmentMatcher = new ProgressiveFragmentMatcher()
+    const handler = jest.fn(() => Observable.of(results.shift()))
 
-    return new ApolloClient({
+    const client = new ApolloClient({
       cache: new InMemoryCache({ fragmentMatcher }),
-      link: ApolloLink.from([
-        fragmentMatcher.link(),
-        new ApolloLink(() => Observable.of(results.shift()))
-      ])
+      link: ApolloLink.from([fragmentMatcher.link(), new ApolloLink(handler)])
     })
+
+    return { client, handler }
   }
 
   it('should instantiate a new fragment matcher', () => {
@@ -25,7 +25,7 @@ describe('ProgressiveFragmentMatcher', () => {
 
   it('should fetch a scalar field', async () => {
     const data = { field: 'bar' }
-    const client = newClient({ data })
+    const { client } = newClient({ data })
     const query = gql`
       {
         field
@@ -39,7 +39,7 @@ describe('ProgressiveFragmentMatcher', () => {
 
   it('should fetch an object', async () => {
     const data = { obj: { __typename: 'Obj', field: 'bar' } }
-    const client = newClient({ data })
+    const { client } = newClient({ data })
     const query = gql`
       {
         obj {
@@ -53,10 +53,29 @@ describe('ProgressiveFragmentMatcher', () => {
     expect(result).toHaveProperty('data.obj.field', 'bar')
   })
 
+  it('should send extension enabled flag', async () => {
+    const data = { field: 'bar' }
+    const { client, handler } = newClient({ data })
+    const query = gql`
+      {
+        field
+      }
+    `
+
+    await client.query({ query })
+
+    expect(handler).toHaveBeenCalledTimes(1)
+
+    expect(handler).toHaveProperty(
+      'mock.calls.0.0.extensions.possibleTypes',
+      true
+    )
+  })
+
   it('should fetch a direct type fragment', async () => {
     const data = { obj: { __typename: 'Obj', field: 'bar' } }
     const extensions = { possibleTypes: { Obj: ['Obj'] } }
-    const client = newClient({ data, extensions })
+    const { client } = newClient({ data, extensions })
     const query = gql`
       {
         obj {
@@ -75,7 +94,7 @@ describe('ProgressiveFragmentMatcher', () => {
   it('should fetch an inheriting fragment', async () => {
     const data = { obj: { __typename: 'Obj', field: 'bar' } }
     const extensions = { possibleTypes: { Obj: ['ParentType'] } }
-    const client = newClient({ data, extensions })
+    const { client } = newClient({ data, extensions })
     const query = gql`
       {
         obj {
@@ -105,7 +124,7 @@ describe('ProgressiveFragmentMatcher', () => {
       }
     }
 
-    const client = newClient({ data, extensions })
+    const { client } = newClient({ data, extensions })
     const query = gql`
       fragment characterFields on Character {
         name
