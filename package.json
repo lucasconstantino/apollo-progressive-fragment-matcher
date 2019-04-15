@@ -21,6 +21,7 @@
   ],
   "main": "lib/index.js",
   "scripts": {
+    "codecov": "yarn test && codecov",
     "compile": "babel src -d lib --ignore src/**/*.test.js",
     "lint": "eslint src",
     "precommit": "lint-staged",

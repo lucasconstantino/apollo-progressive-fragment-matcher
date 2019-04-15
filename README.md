@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/node-contrib-boilerplate.svg?style=flat-square)](https://www.npmjs.com/package/node-contrib-boilerplate)
 [![Downloads/week](https://img.shields.io/npm/dw/node-contrib-boilerplate.svg)](https://npmjs.org/package/node-contrib-boilerplate)
 [![License](https://img.shields.io/npm/l/node-contrib-boilerplate.svg)](https://github.com/lucasconstantino/node-contrib-boilerplate/blob/master/package.json)
-[![build status](https://img.shields.io/travis/lucasconstantino/node-contrib-boilerplate/master.svg?style=flat-square)](https://travis-ci.org/lucasconstantino/node-contrib-boilerplate)
+[![Build Status](https://travis-ci.org/lucasconstantino/apollo-progressive-fragment-matcher.svg?branch=master)](https://travis-ci.org/lucasconstantino/apollo-progressive-fragment-matcher)
 [![coverage](https://img.shields.io/codecov/c/github/lucasconstantino/node-contrib-boilerplate.svg?style=flat-square)](https://codecov.io/github/lucasconstantino/node-contrib-boilerplate)
 
 **A smart alternative to the introspection fragment matcher.**
