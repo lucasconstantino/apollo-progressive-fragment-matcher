@@ -4,7 +4,7 @@ import invariant from 'invariant'
 import { addTypeIntrospections } from './transform'
 
 const defaultOptions = {
-  strategy: 'extension' // 'extension' | ''
+  strategy: 'introspection' // 'introspection' | 'extension'
 }
 
 const strategies = {

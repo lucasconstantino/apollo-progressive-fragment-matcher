@@ -64,6 +64,20 @@ describe('ProgressiveFragmentMatcher', () => {
   })
 
   describe('strategy: extension', () => {
+    const newClient = (...results) => {
+      const fragmentMatcher = new ProgressiveFragmentMatcher({
+        strategy: 'extension'
+      })
+      const handler = jest.fn(() => Observable.of(results.shift()))
+
+      const client = new ApolloClient({
+        cache: new InMemoryCache({ fragmentMatcher }),
+        link: ApolloLink.from([fragmentMatcher.link(), new ApolloLink(handler)])
+      })
+
+      return { client, handler }
+    }
+
     it('should send extension enabled flag', async () => {
       const data = { field: 'bar' }
       const { client, handler } = newClient({ data })
