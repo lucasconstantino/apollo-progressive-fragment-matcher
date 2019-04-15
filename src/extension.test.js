@@ -38,6 +38,11 @@ const typeDefs = graphql`
   }
 `
 
+const map = {
+  Human: ['Character'],
+  Droid: ['Character']
+}
+
 const resolvers = {
   Query: {
     human: (root, { name }) =>
@@ -56,14 +61,18 @@ const resolvers = {
 }
 
 describe('PossibleTypesExtension', () => {
-  const newClient = () =>
-    createTestClient(
+  const newClient = () => {
+    const possibleTypesExtension = () => new PossibleTypesExtension()
+    const extensions = [possibleTypesExtension]
+
+    return createTestClient(
       new ApolloServer({
         typeDefs,
         resolvers,
-        extensions: [() => new PossibleTypesExtension()]
+        extensions
       })
     )
+  }
 
   it('should instantiate a new extension', () => {
     const fragmentMatcher = new PossibleTypesExtension()
@@ -94,19 +103,43 @@ describe('PossibleTypesExtension', () => {
     expect(result).toHaveProperty('data.droid.primaryFunction', 'joke')
   })
 
-  // it('should perform a simple query', async () => {
-  //   const client = newClient()
-  //   const query = gql`
-  //     {
-  //       human(name: "Luke") {
-  //         name
-  //         height
-  //       }
-  //     }
-  //   `
+  it('should return possible types when requested', async () => {
+    const client = newClient()
+    const query = gql`
+      {
+        human(name: "Luke") {
+          name
+          height
+        }
+      }
+    `
 
-  //   const result = await client.query({ query })
+    const extensions = { possibleTypes: true }
+    const result = await client.query({ query, extensions })
 
-  //   expect(result).toHaveProperty('data.human.name', 'Luke')
-  // })
+    expect(result).toHaveProperty('extensions.possibleTypes.Human', map.Human)
+  })
+
+  it('should return multiple possible type maps', async () => {
+    const client = newClient()
+    const query = gql`
+      {
+        human(name: "Luke") {
+          name
+          height
+        }
+
+        droid(name: "R2D2") {
+          name
+          primaryFunction
+        }
+      }
+    `
+
+    const extensions = { possibleTypes: true }
+    const result = await client.query({ query, extensions })
+
+    expect(result).toHaveProperty('extensions.possibleTypes.Human', map.Human)
+    expect(result).toHaveProperty('extensions.possibleTypes.Droid', map.Droid)
+  })
 })
