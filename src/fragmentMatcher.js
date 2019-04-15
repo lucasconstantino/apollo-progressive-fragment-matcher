@@ -46,12 +46,18 @@ const strategies = {
   introspection: {
     link () {
       return new ApolloLink((operation, forward) => {
-        const { types, query } = addTypeIntrospections(operation.query, {
+        const originalQuery = operation.query
+
+        const { types, query } = addTypeIntrospections(originalQuery, {
           possibleTypes: this.possibleTypesMap
         })
 
+        operation.query = query
+
         // enable possible types fetching.
-        return forward({ ...operation, query }).map(result => {
+        return forward(operation).map(result => {
+          operation.query = originalQuery
+
           for (const type of types) {
             const alias = `__${type}__`
 
