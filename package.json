@@ -62,7 +62,6 @@
     "@babel/preset-env": "^7.3.1",
     "apollo-cache-inmemory": "^1.5.1",
     "apollo-client": "^2.5.1",
-    "apollo-link": "^1.2.11",
     "apollo-server": "^2.4.8",
     "apollo-server-testing": "^2.4.8",
     "apollo-utilities": "^1.2.1",
@@ -85,6 +84,7 @@
   },
   "peerDependencies": {
     "apollo-cache-inmemory": "^1.5.1",
+    "apollo-link": "^1.2.11",
     "graphql": "^14.2.1",
     "invariant": "^2.2.4"
   }
