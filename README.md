@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/npm/l/apollo-progressive-fragment-matcher.svg)](https://github.com/lucasconstantino/apollo-progressive-fragment-matcher/blob/master/package.json)
 [![bundlephobia](https://badgen.net/bundlephobia/minzip/apollo-progressive-fragment-matcher@latest)](https://bundlephobia.com/result?p=apollo-progressive-fragment-matcher)
 [![Build Status](https://travis-ci.org/lucasconstantino/apollo-progressive-fragment-matcher.svg?branch=master)](https://travis-ci.org/lucasconstantino/apollo-progressive-fragment-matcher)
-[![codecov](https://codecov.io/gh/lucasconstantino/apollo-progressive-fragment-matcher/branch/master/graph/badge.svg)](https://codecov.io/gh/lucasconstantino/apollo-progressive-fragment-matcher)
+[![codecov](https://codecov.io/gh/lucasconstantino/apollo-progressive-fragment-matcher/branch/master/graph/badge.svg)](https://codecov.io/gh/lucasconstantino/apollo-progressive-fragment-matcher) [![Greenkeeper badge](https://badges.greenkeeper.io/lucasconstantino/apollo-progressive-fragment-matcher.svg)](https://greenkeeper.io/)
 
 **A smart alternative to the introspection fragment matcher.**
 
