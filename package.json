@@ -80,7 +80,7 @@
     "lint-staged": "^8.1.4",
     "prettier-eslint-cli": "^4.7.1",
     "sort-package-json": "^1.19.0",
-    "standard-version": "^5.0.0"
+    "standard-version": "^7.0.1"
   },
   "peerDependencies": {
     "apollo-cache-inmemory": "^1.5.1",
